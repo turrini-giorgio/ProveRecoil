@@ -1,4 +1,4 @@
-import { atom, selectorFamily } from "recoil"
+import { atom, DefaultValue, selectorFamily } from "recoil"
 
 export type ServiceDescriptor = {
     id: number,
@@ -41,8 +41,55 @@ export const listState = atom({
 
 export const ithSdState = selectorFamily({
     key: 'ithSdState',
-    get: (id: number) => ({get}) => {
+    get: (id: number) => ({ get }) => {
         const lista = get(listState)
-        if(id >= 1 && id <= lista.length) return lista[id + 1]
+        if (id >= 1 && id <= lista.length) return lista[id + 1]
     }
 })
+
+export const eliminaSdState = selectorFamily({
+    key: 'eliminaState',
+    get: (id: number) => ({ get }) => {
+        return get(listState).find(x => x.id === id)
+    },
+    set: (id: number) => ({ set, get }) => {
+        const lista = get(listState)
+        const newLista = lista.filter(x => x.id !== id)
+        set(listState, newLista)
+    }
+})
+
+export const newIdState = atom({
+    key: 'newIdState',
+    default: 100
+})
+
+export const listaUpdateState = selectorFamily({
+    key: 'listaUpdateState',
+    get: (id: number) => ({ get }) => {
+        return get(listState).find(x => x.id === id)
+    },
+    set: (id: number) => ({ set, get }, newValue) => {
+        if(!(newValue instanceof DefaultValue)) {
+            if(newValue) {
+                const newSd = newValue as ServiceDescriptor
+                const lista = get(listState)
+                if(newSd.id === 0) {
+                    const newId = get(newIdState) + 1
+                    set(newIdState, newId)
+                    newSd.id = newId
+                    const newLista = [...lista, newSd]
+                    set(listState, newLista)
+                } else {
+                    const ele = lista.find(x => x.id === newSd.id)
+                    if(ele) {
+                        ele.name = newSd.name
+                        ele.url = newSd.url
+                        set(listState, [...lista])
+                    }
+                }
+            }
+        }
+    }
+})
+
