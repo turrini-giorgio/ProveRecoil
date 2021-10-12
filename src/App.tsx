@@ -2,8 +2,7 @@ import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
 import { RecoilRoot, useRecoilValue, useSetRecoilState } from 'recoil'
 import { BrowserRouter as Router, Link, Route } from 'react-router-dom'
 import './App.scss'
-import { eliminaSdState, listaUpdateState, listState, ServiceDescriptor } from './state';
-import { useEffect, useState } from 'react';
+import { eliminaSdState, listState, sdCurrentState, ServiceDescriptor, UiSdElement, updateState } from './state';
 
 function App() {
   return (
@@ -43,7 +42,8 @@ const HomePage = () => {
 }
 const FormPage = () => {
   const lista = useRecoilValue(listState)
-  const handleUpdate = useSetRecoilState(listaUpdateState(0))
+  const updateList = useSetRecoilState(updateState)
+  const handleUpdate = useSetRecoilState(sdCurrentState(0))
   const handleAdd = () => {
     const sd: ServiceDescriptor = {
       id: 0,
@@ -52,57 +52,59 @@ const FormPage = () => {
     }
     handleUpdate(sd)
   }
+  const handleSalva = () => {
+    updateList([]);
+  }
   return (
     <div className="p-3">
       <h1>Form Page</h1>
       <div className="p-3 d-flex flex-column">
-        <div><Link className="fs-5 text-decoration-none" to="/">Home</Link></div>
-        <div><Link className="fs-5 text-decoration-none" to="/form">Form</Link></div>
-        <div><button className="btn btn-primary btn-sm" onClick={handleAdd}>Add</button></div>
+        <div className="mb-4"><Link className="fs-5 text-decoration-none" to="/">Home</Link></div>
+        <div className="mb-3">
+          <button className="btn btn-primary btn-sm me-3" onClick={handleAdd}>Add</button>
+          <button className="btn btn-primary btn-sm" onClick={handleSalva}>Salva</button>
+        </div>
         <div>
-          {lista && lista.map(el => (
-            <Element ele={el} key={el.id} />
-          ))
-
-          }
+          {lista && lista.map(el => (<Element uiele={el} key={el.current.id} />))}
         </div>
       </div>
     </div>
   )
 }
 
-const Element = ({ ele }: { ele: ServiceDescriptor }) => {
+const Element = ({ uiele }: { uiele: UiSdElement }) => {
+  const ele = uiele.current
   const eliminaSd = useSetRecoilState(eliminaSdState(ele.id))
-  const updateSd = useSetRecoilState(listaUpdateState(ele.id))
+  const updateCurrentSd = useSetRecoilState(sdCurrentState(ele.id))
   const handleOnClick = () => {
-    eliminaSd(ele)
+    eliminaSd(uiele)
   }
-  const [name, setName] = useState(ele && ele.name)
-  useEffect(() => setName(ele.name), [ele])
-  const handleSave = () => {
-    updateSd({ ...ele, name })
+  const setValue = (fieldName: string, value: string) => {
+    updateCurrentSd(sd => { 
+      const nuovo = ({ ...ele, [fieldName]: value })
+      return nuovo
+    })
   }
+  const setName = (value: string) => setValue('name', value)
+  const setUrl = (value: string) => setValue('url', value)
   return (
     <div className="border mb-2 ps-2">
       <div className="row">
-        <div className="col-3">Id</div>
-        <div className="col-9">{ele.id}</div>
+        <div className="col-1">Id</div>
+        <div className="col-11">{ele.id}</div>
       </div>
       <div className="row">
-        <div className="col-3">Name</div>
-        {/* <div className="col-9">{ele.name}</div> */}
-        <div className="col-9"><input value={name} onChange={ev => setName(ev.target.value)} />&nbsp;{ele.name}</div>
-      </div>
-      <div className="row">
-        <div className="col-3">Url</div>
-        <div className="col-9">{ele.url}</div>
-      </div>
-      <div className="row">
-        <div className="col-3">&nbsp;</div>
-        <div className="col-9">
+        <div className="col-1">Name</div>
+        <div className="col-5"><input className="form-control form-control-sm" value={ele.name} onChange={ev => setName(ev.target.value)} /></div>
+        <div className="col-4">{uiele.old.name}</div>
+        <div className="col-2">
           <button className="btn btn-primary btn-sm me-3" onClick={handleOnClick}>Elimina</button>
-          <button className="btn btn-primary btn-sm" onClick={handleSave}>Salva</button>
         </div>
+      </div>
+      <div className="row">
+        <div className="col-1">Url</div>
+        <div className="col-5"><input className="form-control form-control-sm" value={ele.url} onChange={ev => setUrl(ev.target.value)} /></div>
+        <div className="col-4">{uiele.old.url}</div>
       </div>
     </div>
   )
