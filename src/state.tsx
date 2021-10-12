@@ -49,9 +49,7 @@ export const ithSdState = selectorFamily({
 
 export const eliminaSdState = selectorFamily({
     key: 'eliminaState',
-    get: (id: number) => ({ get }) => {
-        return get(listState).find(x => x.id === id)
-    },
+    get: (id: number) => ({ get }) => get(listState).find(x => x.id === id),
     set: (id: number) => ({ set, get }) => {
         const lista = get(listState)
         const newLista = lista.filter(x => x.id !== id)
@@ -66,15 +64,13 @@ export const newIdState = atom({
 
 export const listaUpdateState = selectorFamily({
     key: 'listaUpdateState',
-    get: (id: number) => ({ get }) => {
-        return get(listState).find(x => x.id === id)
-    },
+    get: (id: number) => ({ get }) => get(listState).find(x => x.id === id),
     set: (id: number) => ({ set, get }, newValue) => {
-        if(!(newValue instanceof DefaultValue)) {
-            if(newValue) {
+        if (!(newValue instanceof DefaultValue)) {
+            if (newValue) {
                 const newSd = newValue as ServiceDescriptor
                 const lista = get(listState)
-                if(newSd.id === 0) {
+                if (newSd.id === 0) {
                     const newId = get(newIdState) + 1
                     set(newIdState, newId)
                     newSd.id = newId
@@ -82,10 +78,12 @@ export const listaUpdateState = selectorFamily({
                     set(listState, newLista)
                 } else {
                     const ele = lista.find(x => x.id === newSd.id)
-                    if(ele) {
-                        ele.name = newSd.name
-                        ele.url = newSd.url
-                        set(listState, [...lista])
+                    if (ele) {
+                        const idx = lista.findIndex(x => x.id === ele.id)
+                        if (idx >= 0) {
+                            const newLista = [...lista.slice(0, idx), newSd, ...lista.slice(idx + 1)]
+                            set(listState, newLista)
+                        }
                     }
                 }
             }

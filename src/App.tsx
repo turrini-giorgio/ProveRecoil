@@ -3,6 +3,7 @@ import { RecoilRoot, useRecoilValue, useSetRecoilState } from 'recoil'
 import { BrowserRouter as Router, Link, Route } from 'react-router-dom'
 import './App.scss'
 import { eliminaSdState, listaUpdateState, listState, ServiceDescriptor } from './state';
+import { useEffect, useState } from 'react';
 
 function App() {
   return (
@@ -72,8 +73,14 @@ const FormPage = () => {
 
 const Element = ({ ele }: { ele: ServiceDescriptor }) => {
   const eliminaSd = useSetRecoilState(eliminaSdState(ele.id))
+  const updateSd = useSetRecoilState(listaUpdateState(ele.id))
   const handleOnClick = () => {
     eliminaSd(ele)
+  }
+  const [name, setName] = useState(ele && ele.name)
+  useEffect(() => setName(ele.name), [ele])
+  const handleSave = () => {
+    updateSd({...ele, name })
   }
   return (
     <div className="border mb-2 ps-2">
@@ -83,7 +90,8 @@ const Element = ({ ele }: { ele: ServiceDescriptor }) => {
       </div>
       <div className="row">
         <div className="col-3">Name</div>
-        <div className="col-9">{ele.name}</div>
+        {/* <div className="col-9">{ele.name}</div> */}
+        <div className="col-9"><input value={name} onChange={ev => setName(ev.target.value)} />&nbsp;{ele.name}</div>
       </div>
       <div className="row">
         <div className="col-3">Url</div>
@@ -92,7 +100,8 @@ const Element = ({ ele }: { ele: ServiceDescriptor }) => {
       <div className="row">
         <div className="col-3">&nbsp;</div>
         <div className="col-9">
-          <button className="btn btn-primary btn-sm" onClick={handleOnClick}>Elimina</button>
+        <button className="btn btn-primary btn-sm" onClick={handleOnClick}>Elimina</button>
+        <button className="btn btn-primary btn-sm" onClick={handleSave}>Save</button>
         </div>
       </div>
     </div>
