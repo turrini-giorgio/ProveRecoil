@@ -80,7 +80,7 @@ const Element = ({ ele }: { ele: ServiceDescriptor }) => {
   const [name, setName] = useState(ele && ele.name)
   useEffect(() => setName(ele.name), [ele])
   const handleSave = () => {
-    updateSd({...ele, name })
+    updateSd({ ...ele, name })
   }
   return (
     <div className="border mb-2 ps-2">
@@ -100,8 +100,8 @@ const Element = ({ ele }: { ele: ServiceDescriptor }) => {
       <div className="row">
         <div className="col-3">&nbsp;</div>
         <div className="col-9">
-        <button className="btn btn-primary btn-sm" onClick={handleOnClick}>Elimina</button>
-        <button className="btn btn-primary btn-sm" onClick={handleSave}>Save</button>
+          <button className="btn btn-primary btn-sm me-3" onClick={handleOnClick}>Elimina</button>
+          <button className="btn btn-primary btn-sm" onClick={handleSave}>Salva</button>
         </div>
       </div>
     </div>
